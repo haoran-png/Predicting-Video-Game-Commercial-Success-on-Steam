@@ -3,7 +3,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)]()
-[![License](https://img.shields.io/badge/License-MIT-green)]([LICENSE](https://www.mit.edu/~amini/LICENSE.md))
+[![License](https://img.shields.io/badge/License-MIT-green)](https://www.mit.edu/~amini/LICENSE.md)
 
 ---
 
