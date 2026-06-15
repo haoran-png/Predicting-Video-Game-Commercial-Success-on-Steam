@@ -1,6 +1,6 @@
 games.csv
-games.json
-steam-games-dataset-metadata.json
+example.csv
+games_clean_r1.csv
 
 .DS_Store
 **/.Ds_Store
