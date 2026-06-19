@@ -38,16 +38,16 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 
 ~122,000 raw games including release date, genre, tags, price, review count, and review sentiment ratio.
 
-> ⚠️ `games_clean.r1.csv` is not included in this repo due to file size.  
+> `games_clean.r1.csv` is not included in this repo due to file size.  
 > To reproduce it, run `notebooks/02_cleaning_initial.ipynb`.
 
 **Target variable:** A composite success score defined as:
 
 ```
-success_score = log1p(review_count) × positive_review_ratio
+success_score = log1p(review_count) × wilson_lower_bound(positive, negative)
 ```
 
-This captures both reach (total reviews as a proxy for sales volume) and quality (sentiment ratio), computed from data available one year post-release. The log transform addresses the strong right skew in review counts. The choice of this formulation over alternatives (raw review count, rating alone) is discussed in `notebooks/03_eda_final.ipynb`.
+This captures both reach (total reviews as a proxy for sales volume) and quality (review confidence), reflecting each game's cumulative performance up to the dataset snapshot date. The log transform addresses the strong right skew in review counts. The Wilson lower bound replaces a raw positive ratio, penalising games with few reviews where the observed ratio is statistically unreliable. The choice of this formulation over alternatives (raw review count, rating alone) is discussed in `notebooks/03_eda_final.ipynb`.
 
 ---
 
@@ -119,7 +119,7 @@ steam-ml-project/
 ├── notebooks/
 │   ├── 01_eda_raw.ipynb            # Round 1 EDA — raw data structure and problems
 │   ├── 02_cleaning_initial.ipynb   # Round 1 cleaning — structural fixes
-│   ├── 03_eda_fianl.ipynb          # Round 2 EDA — patterns, target variable definition
+│   ├── 03_eda_final.ipynb          # Round 2 EDA — patterns, target variable definition
 │   ├── 04_cleaning_final.ipynb     # Round 2 cleaning — final prep, split, export
 │   ├── 05_features.ipynb           # Feature engineering
 │   ├── 06_modelling.ipynb          # Model training and comparison
@@ -163,10 +163,17 @@ steam-ml-project/
 
 ## Limitations and Future Work
 
-- Review count is used as a proxy for sales volume; actual sales figures are not public on Steam.
-- The dataset does not include post-launch marketing spend or publisher size, both of which are likely confounders.
-- The model is trained on a single platform (Steam); generalisability to console or mobile markets is untested.
-- Future extension: genre stratified models to test whether success drivers differ meaningfully across categories (e.g. action vs simulation vs indie).
+**Limitations**
+
+- **Time-on-market bias:** Lifetime review counts favour older games — titles released years ago have had more time to accumulate reviews, build a player base, and benefit from repeated Steam sales cycles. The temporal train/test split prevents data leakage but does not resolve this; a 2010 game and a 2022 game are not directly comparable on raw review counts alone.
+- **Unobserved marketing:** The dataset is restricted to on-platform Steam metrics. Pre-release hype, influencer coverage, ad spend, and community building on platforms like Discord or Reddit are not captured, yet likely drive a meaningful share of a game's commercial outcome.
+- **Sales proxy:** Review count serves as a proxy for sales volume since Steam does not publish sales figures. The ratio of purchases to reviews varies across genres, price points, and player demographics, so the proxy is imperfect and inconsistent.
+- **Platform scope:** The model is trained exclusively on Steam (PC). Findings may not generalise to console or mobile markets, which have different discovery mechanisms, pricing norms, and player behaviour.
+
+**Future work**
+
+- Genre-stratified models to test whether success drivers differ meaningfully across categories (e.g. action vs. simulation vs. indie).
+- Incorporating external signals such as Metacritic score coverage or social media presence where available.
 
 ---
 
