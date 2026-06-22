@@ -19,10 +19,10 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 
 | Stage | Status | Notes |
 |---|---|---|
-| EDA — round 1 (raw data) | ✅ Completed | See `notebooks/01_eda_raw.ipynb` |
-| Cleaning — round 1 (structural) | ✅ Completed | See `notebooks/02_cleaning_initial.ipynb` |
-| EDA — round 2 (patterns & target) | 🔄 In Progress | See `notebooks/03_eda_final.ipynb` |
-| Cleaning — round 2 (final prep) | ⬜ Planned | See `notebooks/04_cleaning_final.ipynb` |
+| EDA — round 1 (raw data) | ✅ Completed | Catalogued structural issues: column shift, dtype mismatches, ~99.97% null `Achievements` |
+| Cleaning — round 1 (structural) | ✅ Completed | Removed duplicates, non-game entries, and 883 utility-software rows (`02_cleaning_initial.ipynb`) |
+| EDA — round 2 (patterns & target) | ✅ Completed | Defined `success_score`; identified `num_tags` and `game_age_days` as strongest predictors (`03_eda_final.ipynb`) |
+| Cleaning — round 2 (final prep) | 🔄 In Progress | Apply transformations, encode features, temporal split (`04_cleaning_final.ipynb`) |
 | Feature engineering | ⬜ Planned | Time, price, genre, tag features |
 | Baseline model (Linear Regression) | ⬜ Planned | |
 | Tree models (Random Forest, XGBoost) | ⬜ Planned | |
@@ -153,10 +153,14 @@ steam-ml-project/
 - **Zero-Inflated Engagement:** Uncovered massive right skew across all player activity metrics; the median for Peak CCU, reviews, and playtime is 0, indicating that mean based metrics will be heavily dominated by a few massive outliers.
 - **Market Distribution:** Analyzed the pricing spread ($0 to $999.98) and found a highly skewed $2.24 median, reflecting the platform's heavy dominance of free-to-play and budget titles.
 
-**Round 2 EDA observations (current):**
-- *(Distribution findings, genre breakdowns, target variable justification)*
+**Round 2 EDA observations:**
+- **Time-on-market confound confirmed but partial:** Median review count by release year collapses from 2017 onward as annual releases explode, reflecting dilution rather than declining quality. The effect is real but not deterministic — young titles like *Black Myth: Wukong* (2024) reached the same top tier as decade old games — so `game_age_days` is carried forward as a model feature rather than used to adjust the target variable.
+- **Genre and tag differences appear genuine:** Average success score per genre and tag showed no consistent relationship with age or category size, suggesting these differences reflect real signal rather than platform-history artefacts.
+- **Wilson lower bound chosen over Bayesian averaging:** Wilson requires no global prior, which suits this dataset's heavy skew. The top five games by `success_score` (Counter-Strike 2, Terraria, Garry's Mod, Black Myth: Wukong, Stardew Valley) are all genuine commercial successes, supporting the formula.
+- **Strongest predictors:** `num_tags` (r ≈ 0.52) and `game_age_days` (r ≈ 0.41) correlate far more strongly with `success_score` than Price, Achievements, DLC count, or Peak CCU (all below 0.10).
+- **Retroactive cleaning fix:** Genre analysis surfaced non-game software (e.g. *Wallpaper Engine*) that slipped through round 1 filtering. A conservative genre-based rule was added to `02_cleaning_initial.ipynb`, removing 883 rows.
 
-**Modelling findings (planned):**
+**Modelling findings:**
 - *(Best model, SHAP findings, error analysis conclusions)*
 
 ---
@@ -165,7 +169,7 @@ steam-ml-project/
 
 **Limitations**
 
-- **Time-on-market bias:** Lifetime review counts favour older games — titles released years ago have had more time to accumulate reviews, build a player base, and benefit from repeated Steam sales cycles. The temporal train/test split prevents data leakage but does not resolve this; a 2010 game and a 2022 game are not directly comparable on raw review counts alone.
+- **Time-on-market bias:** Lifetime review counts favour older games, though EDA confirmed this effect is partial rather than deterministic, young titles can and do reach the same top tier as older ones. `game_age_days` is carried forward as a model feature to let this effect be quantified directly rather than corrected for in the target variable itself, meaning a 2010 game and a 2022 game remain not directly comparable on `success_score` alone.
 - **Unobserved marketing:** The dataset is restricted to on-platform Steam metrics. Pre-release hype, influencer coverage, ad spend, and community building on platforms like Discord or Reddit are not captured, yet likely drive a meaningful share of a game's commercial outcome.
 - **Sales proxy:** Review count serves as a proxy for sales volume since Steam does not publish sales figures. The ratio of purchases to reviews varies across genres, price points, and player demographics, so the proxy is imperfect and inconsistent.
 - **Platform scope:** The model is trained exclusively on Steam (PC). Findings may not generalise to console or mobile markets, which have different discovery mechanisms, pricing norms, and player behaviour.
@@ -178,6 +182,9 @@ steam-ml-project/
 ---
 
 ## Setup
+
+> `requirements.txt` will be added once the modelling stages are complete. For now, the project depends on `pandas`, `numpy`, `matplotlib`, and `statsmodels`.
+
 
 ```bash
 git clone https://github.com/haoran-png/Predicting-Video-Game-Commercial-Success-on-Steam.git
