@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from collections import Counter
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from statsmodels.stats.proportion import proportion_confint
 
 def load_data(data_path):
@@ -124,7 +126,6 @@ def encode_genres(df, train_df=None, top_genres=None, top_n=20):
     df = pd.concat([df, genre_dummies], axis=1)
     return df, top_genres
 
-
 def split_data(df):
     """
     Splits the dataset temporally:
@@ -141,3 +142,107 @@ def split_data(df):
     val_df = df[val_mask].copy()
     
     return train_df, test_df, val_df
+
+# Advanced Feature Engineering Functions (Combined from Notebook 5)
+
+def add_pricing_tiers(df):
+    """
+    Categorizes Price into four tiers: free, budget, mid, premium.
+    One-hot encodes the price tier, guaranteeing identical shapes.
+    """
+    df = df.copy()
+    
+    def get_tier(price):
+        if price == 0:
+            return 'free'
+        elif price <= 5.0:
+            return 'budget'
+        elif price <= 20.0:
+            return 'mid'
+        else:
+            return 'premium'
+            
+    df['price_tier'] = df['Price'].apply(get_tier)
+    
+    # Enforce categorical type to align dummy columns automatically
+    categories = ['free', 'budget', 'mid', 'premium']
+    df['price_tier'] = pd.Categorical(df['price_tier'], categories=categories)
+    
+    price_dummies = pd.get_dummies(df['price_tier'], prefix='price_tier')
+    for col in price_dummies.columns:
+        price_dummies[col] = price_dummies[col].astype(int)
+        
+    # Drop intermediate columns if any
+    pre_existing = [c for c in df.columns if c.startswith('price_tier_')]
+    df = df.drop(columns=pre_existing, errors='ignore')
+    
+    df = pd.concat([df, price_dummies], axis=1)
+    return df
+
+def add_genre_count(df):
+    """
+    Counts the number of genres a game belongs to.
+    """
+    df = df.copy()
+    genres_clean = df['Genres'].fillna('')
+    df['num_genres'] = genres_clean.apply(lambda x: len([g.strip() for g in x.split(',') if g.strip()]) if x else 0)
+    return df
+
+def fit_tag_frequencies(train_df):
+    """
+    Fits tag frequency mapping based ONLY on training data to avoid future leakage.
+    """
+    tags_series = train_df['Tags'].fillna('')
+    tag_counter = Counter()
+    for tags_str in tags_series:
+        if tags_str:
+            tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+            tag_counter.update(tags)
+    return dict(tag_counter)
+
+def add_tag_frequency_features(df, tag_freq_map):
+    """
+    Maps tags to training set frequencies and computes aggregates: mean, max, min, sum.
+    """
+    df = df.copy()
+    
+    def get_tag_stats(tags_str):
+        if not tags_str or pd.isna(tags_str):
+            return 0.0, 0.0, 0.0, 0.0
+        tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+        if not tags:
+            return 0.0, 0.0, 0.0, 0.0
+        freqs = [tag_freq_map.get(t, 0) for t in tags]
+        return float(np.mean(freqs)), float(np.max(freqs)), float(np.min(freqs)), float(np.sum(freqs))
+
+    stats = df['Tags'].apply(get_tag_stats)
+    
+    df['tag_freq_mean'] = stats.apply(lambda x: x[0])
+    df['tag_freq_max'] = stats.apply(lambda x: x[1])
+    df['tag_freq_min'] = stats.apply(lambda x: x[2])
+    df['tag_freq_sum'] = stats.apply(lambda x: x[3])
+    
+    return df
+
+def add_description_sentiment(df):
+    """
+    Calculates the compound sentiment score from NLTK VADER on the description column.
+    """
+    df = df.copy()
+    sia = SentimentIntensityAnalyzer()
+    
+    # Handle missing values
+    descriptions = df['About the game'].fillna('')
+    
+    # Compute scores using list comprehension (fastest execution path)
+    df['desc_sentiment_score'] = [sia.polarity_scores(text)['compound'] for text in descriptions]
+    return df
+
+def add_temporal_features(df):
+    """
+    Extracts release_year from the 'Release date' column.
+    """
+    df = df.copy()
+    if 'Release date' in df.columns:
+        df['release_year'] = pd.to_datetime(df['Release date']).dt.year
+    return df
