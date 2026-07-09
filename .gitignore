@@ -6,3 +6,6 @@ games_clean_r1.csv
 **/.Ds_Store
 
 __pycache__/
+data/processed/games_train.csv
+data/processed/games_test.csv
+data/processed/games_val.csv
