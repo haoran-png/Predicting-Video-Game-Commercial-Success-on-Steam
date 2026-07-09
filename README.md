@@ -23,7 +23,7 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 | Cleaning — round 1 (structural) | ✅ Completed | Removed duplicates, non-game entries, and 883 utility-software rows (`02_cleaning_initial.ipynb`) |
 | EDA — round 2 (patterns & target) | ✅ Completed | Defined `success_score`; identified `num_tags` and `game_age_days` as strongest predictors (`03_eda_final.ipynb`) |
 | Cleaning — round 2 (final prep) | ✅ Completed | Extract modular `src/data_cleaning` pipeline, apply transformations, align & encode genres, and temporal split (`04_cleaning_final.ipynb`) |
-| Feature engineering | ✅ Completed | Time, price, genre, tag, text sentiment features (`05_features.ipynb`) |
+| Feature engineering | ✅ Completed | Time, price, genre, tag, text sentiment features (`04_cleaning_final.ipynb`) |
 | Baseline model (Linear Regression) | ⬜ Planned | |
 | Tree models (Random Forest, XGBoost) | ⬜ Planned | |
 | SHAP analysis & error analysis | ⬜ Planned | |
