@@ -22,7 +22,7 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 | EDA — round 1 (raw data) | ✅ Completed | Catalogued structural issues: column shift, dtype mismatches, ~99.97% null `Achievements` |
 | Cleaning — round 1 (structural) | ✅ Completed | Removed duplicates, non-game entries, and 883 utility-software rows (`02_cleaning_initial.ipynb`) |
 | EDA — round 2 (patterns & target) | ✅ Completed | Defined `success_score`; identified `num_tags` and `game_age_days` as strongest predictors (`03_eda_final.ipynb`) |
-| Cleaning — round 2 (final prep) | 🔄 In Progress | Apply transformations, encode features, temporal split (`04_cleaning_final.ipynb`) |
+| Cleaning — round 2 (final prep) | ✅ Completed | Extract modular `src/data_cleaning` pipeline, apply transformations, align & encode genres, and temporal split (`04_cleaning_final.ipynb`) |
 | Feature engineering | ⬜ Planned | Time, price, genre, tag features |
 | Baseline model (Linear Regression) | ⬜ Planned | |
 | Tree models (Random Forest, XGBoost) | ⬜ Planned | |
@@ -159,6 +159,12 @@ steam-ml-project/
 - **Wilson lower bound chosen over Bayesian averaging:** Wilson requires no global prior, which suits this dataset's heavy skew. The top five games by `success_score` (Counter-Strike 2, Terraria, Garry's Mod, Black Myth: Wukong, Stardew Valley) are all genuine commercial successes, supporting the formula.
 - **Strongest predictors:** `num_tags` (r ≈ 0.52) and `game_age_days` (r ≈ 0.41) correlate far more strongly with `success_score` than Price, Achievements, DLC count, or Peak CCU (all below 0.10).
 - **Retroactive cleaning fix:** Genre analysis surfaced non-game software (e.g. *Wallpaper Engine*) that slipped through round 1 filtering. A conservative genre-based rule was added to `02_cleaning_initial.ipynb`, removing 883 rows.
+
+**Round 2 Cleaning & Preprocessing observations:**
+- **Modular Pipeline:** Established a reusable module [`src/data_cleaning.py`](file:///Users/banananakun./Documents/project/Predicting-Video-Game-Commercial-Success-on-Steam/src/data_cleaning.py) to unify all feature engineering, encoding, and splitting logic, preventing code duplication and keeping the notebook clean.
+- **Dataset Reduction:** Dropping zero-review games reduced the dataset by ~28% (~31k rows), resulting in 81,837 active game records with a non-negative `success_score` target.
+- **Post-2020 Market Growth:** The temporal splitting resulted in a Test set (34,531 rows, 2020–2023) that is larger than the Training set (29,128 rows, pre-2020). This highlights the massive post-2020 explosion of Steam releases.
+- **Feature Alignment & Quality Assertions:** Implemented automated sanity checks to verify matching column counts across all splits (all aligned to 68 features using categorical genre mappings) and ensure strict row count integrity prior to modeling.
 
 **Modelling findings:**
 - *(Best model, SHAP findings, error analysis conclusions)*

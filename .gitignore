@@ -4,3 +4,5 @@ games_clean_r1.csv
 
 .DS_Store
 **/.Ds_Store
+
+__pycache__/
