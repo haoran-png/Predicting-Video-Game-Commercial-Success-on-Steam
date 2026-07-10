@@ -183,8 +183,10 @@ steam-ml-project/
 
 **Future work**
 
-- Genre-stratified models to test whether success drivers differ meaningfully across categories (e.g. action vs. simulation vs. indie).
-- Incorporating external signals such as Metacritic score coverage or social media presence where available.
+- **Genre stratification:** Train genre-stratified models to test whether success drivers differ meaningfully across categories (e.g., action vs. simulation vs. indie).
+- **Off-platform viral signals:** Incorporate external metrics like Twitch peak viewer counts or YouTube trailer views to capture influencer-driven viral spikes identified in our high-error analysis (e.g., *HoloCure*, *FPS Chess*).
+- **Advanced description NLP:** Replace rule-based VADER sentiment with transformer-based embeddings (e.g., DistilBERT) to analyze the semantic complexity and emotional layout of store listings.
+- **Dynamic pricing engine:** Develop a utility-maximization pricing engine inside the app to recommend price points that maximize projected revenue based on target genres and tags.
 
 ---
 
