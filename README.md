@@ -26,9 +26,9 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 | Feature engineering | ✅ Completed | Time, price, genre, tag, text sentiment features (`04_cleaning_final.ipynb`) |
 | Baseline model (Linear Regression) | ✅ Completed | Ridge Baseline model (`Test R2: 0.36`) |
 | Tree models (Random Forest, XGBoost) | ✅ Completed | Random Forest (`Test R2: 0.59`) and XGBoost (`Test R2: 0.64`) |
-| SHAP analysis & error analysis | ⬜ Planned | |
+| SHAP analysis & error analysis | ✅ Completed | SHAP beeswarm plot, dependence plots, and high-error cluster analysis (`06_evaluation.ipynb`) |
 | MLflow experiment tracking | ✅ Completed | SQLite experiment logging of metrics/params/models |
-| Streamlit deployment | ⬜ Planned | |
+| Streamlit deployment | ✅ Completed | Interactive predictor with user inputs, sentiment scores, and SHAP waterfalls (`app/streamlit_app.py`) |
 
 ---
 
@@ -112,6 +112,8 @@ Beyond standard metrics (RMSE, MAE, R²), the evaluation section includes:
 ```
 steam-ml-project/
 │
+├── assets/                         # Static image assets (generalization, distributions)
+│
 ├── data/
 │   ├── raw/                        # Original Kaggle dataset (not tracked in git)
 │   └── processed/                  # Cleaned, modelling ready data
@@ -122,7 +124,10 @@ steam-ml-project/
 │   ├── 03_eda_final.ipynb          # Round 2 EDA — patterns, target variable definition
 │   ├── 04_cleaning_final.ipynb     # Round 2 cleaning & feature engineering — final prep, split, export
 │   ├── 05_modelling.ipynb          # Model training and comparison
-│   └── 06_evaluation.ipynb         # SHAP, residual analysis, error cases
+│   ├── 05_modelling_portfolio.ipynb # Portfolio-focused copy of model training and tuning
+│   ├── 06_evaluation.ipynb         # SHAP, residual analysis, error cases
+│   ├── 06_evaluation_portfolio.ipynb # Portfolio-focused copy of evaluation and diagnostics
+│   └── mlruns/                     # MLflow tracking (auto-generated)
 │
 ├── src/
 │   ├── data_cleaning.py            # Reusable cleaning & feature engineering functions
@@ -133,7 +138,6 @@ steam-ml-project/
 ├── app/
 │   └── streamlit_app.py
 │
-├── mlruns/                         # MLflow tracking (auto-generated)
 ├── requirements.txt
 └── README.md
 ```
@@ -184,9 +188,32 @@ steam-ml-project/
 
 ---
 
+## Interactive Predictor App
+
+To turn our modelling and interpretability findings into a practical tool for developers, we deployed an interactive web application using **Streamlit** (`app/streamlit_app.py`).
+
+### Key Features
+- **Dynamic Parameter Inputs:** Developers can input key launch parameters including price, planned achievements, DLC counts, platform targets (Windows, Mac, Linux), primary genre, and descriptive tags.
+- **VADER Sentiment Analysis:** The application uses NLTK VADER to run real-time sentiment analysis on the store description, feeding the compound score into the model.
+- **Live success_score Prediction:** Estimates the game's commercial success score instantly using our optimal serialized XGBoost model.
+- **Local SHAP Waterfall Explanations:** Generates and displays a local SHAP waterfall plot, showing exactly which features contributed positively or negatively to that specific game's prediction.
+- **Optimization Recommendations:** Provides tailored recommendations on how to improve the game's predicted success (e.g., pricing recommendations, platform targeting flags, description sentiment tips, or tag density advice).
+
+### Running the App
+To start the local Streamlit server from the project root, run:
+```bash
+# In your active environment:
+streamlit run app/streamlit_app.py
+
+# If streamlit is not on your global zsh path:
+/opt/anaconda3/bin/streamlit run app/streamlit_app.py
+```
+
+---
+
 ## Setup
 
-> `requirements.txt` will be finalised once the evaluation and deployment stages are complete. Core dependencies include `pandas`, `numpy`, `matplotlib`, `seaborn`, `statsmodels`, `scikit-learn`, `xgboost`, `mlflow`, `joblib`, and `scipy`.
+> All core project dependencies are locked and documented in `requirements.txt`.
 
 
 ```bash
@@ -203,3 +230,7 @@ Download the dataset from [Kaggle](https://www.kaggle.com/datasets/fronkongames/
 
 **[Haoran Jinfu]**
 BSc Mathematics with Data Science | [LinkedIn](https://www.linkedin.com/in/haoranjinfu/)
+
+---
+
+*Note: This project was developed with the assistance of Antigravity, an AI coding assistant designed by Google DeepMind.*
