@@ -172,6 +172,20 @@ steam-ml-project/
 
 ---
 
+## Summary of Findings (Research Question Answered)
+
+### 1. Which game characteristics are most predictive of long-term commercial success?
+- **Time-on-Market (Baseline Control):** `game_age_days` (and its log transform) dominates the absolute SHAP attribution magnitude. This confirms a structural property of Steam's system: older titles have accumulated review counts over years, making baseline age the strongest predictor of cumulative metrics.
+- **Tag Density (Developer-Actionable):** The number of tags (`num_tags`) is the single most important actionable launch characteristic. Games with a dense set of descriptive tags (12–15) receive a strong positive SHAP attribution, highlighting the critical role of search indexing and store discovery algorithms.
+- **Pricing Strategy:** Price (`log_price`, `is_free`, and price tiers) exhibits a clear, non-linear relationship. Free-to-play titles represent high-variance breakouts (with highly positive or negative attributions), while mid-tier paid games ($5–$20) receive stable, positive attributions that decline as the price exceeds $20.
+- **Copywriting Sentiment:** Store description sentiment (`desc_sentiment_score`) has a secondary but positive impact, indicating that writing engaging, enthusiastic copywriting correlates with higher success.
+
+### 2. Does this relationship vary by genre?
+- **Relationship Stability:** Subgroup residual analysis across the top 8 genres shows that the median prediction error remains tightly centered around 0. This reveals that the model's primary success drivers (tags, pricing, description sentiment) act consistently across all main genres.
+- **Volatility Differences:** Although the core drivers are consistent, the *variance* of the residuals differs. Genres like Action, Adventure, and Indie show a much wider spread of residuals (revealing higher volatility and greater likelihood of unexpected viral breakouts or failures), whereas genres like Strategy and Casual are much more predictable.
+
+---
+
 ## Limitations and Future Work
 
 **Limitations**
