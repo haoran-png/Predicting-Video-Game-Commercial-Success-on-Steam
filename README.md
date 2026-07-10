@@ -235,4 +235,4 @@ BSc Mathematics with Data Science | [LinkedIn](https://www.linkedin.com/in/haora
 
 ---
 
-*Note: This project was developed with the assistance of Antigravity, an AI coding assistant designed by Google DeepMind.*
+*Note: AI tools were used to assist in writing and refining this code.*
