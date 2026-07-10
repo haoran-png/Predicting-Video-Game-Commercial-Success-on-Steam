@@ -9,3 +9,7 @@ __pycache__/
 data/processed/games_train.csv
 data/processed/games_test.csv
 data/processed/games_val.csv
+mlflow.db
+mlruns/
+**/mlruns/
+*.joblib

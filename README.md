@@ -24,10 +24,10 @@ Most existing analyses of Steam data treat success prediction as a straightforwa
 | EDA — round 2 (patterns & target) | ✅ Completed | Defined `success_score`; identified `num_tags` and `game_age_days` as strongest predictors (`03_eda_final.ipynb`) |
 | Cleaning — round 2 (final prep) | ✅ Completed | Extract modular `src/data_cleaning` pipeline, apply transformations, align & encode genres, and temporal split (`04_cleaning_final.ipynb`) |
 | Feature engineering | ✅ Completed | Time, price, genre, tag, text sentiment features (`04_cleaning_final.ipynb`) |
-| Baseline model (Linear Regression) | ⬜ Planned | |
-| Tree models (Random Forest, XGBoost) | ⬜ Planned | |
+| Baseline model (Linear Regression) | ✅ Completed | Ridge Baseline model (`Test R2: 0.36`) |
+| Tree models (Random Forest, XGBoost) | ✅ Completed | Random Forest (`Test R2: 0.59`) and XGBoost (`Test R2: 0.64`) |
 | SHAP analysis & error analysis | ⬜ Planned | |
-| MLflow experiment tracking | ⬜ Planned | |
+| MLflow experiment tracking | ✅ Completed | SQLite experiment logging of metrics/params/models |
 | Streamlit deployment | ⬜ Planned | |
 
 ---
@@ -91,7 +91,7 @@ Three supervised learning models are trained and compared:
 
 | Model | Purpose |
 |---|---|
-| Linear Regression | Interpretable baseline; establishes minimum viable performance |
+| Ridge Regression | Interpretable baseline; establishes minimum viable performance via L2-regularised linear model |
 | Random Forest | Captures non-linear relationships; provides native feature importances |
 | XGBoost | Expected best performer; compatible with SHAP for post-hoc interpretability |
 
@@ -159,7 +159,12 @@ steam-ml-project/
 - **Retroactive cleaning fix:** Genre analysis surfaced non-game software (e.g. *Wallpaper Engine*) that slipped through round 1 filtering. A conservative genre-based rule was added to `02_cleaning_initial.ipynb`, removing 883 rows.
 
 **Modelling findings:**
-- *(Best model, SHAP findings, error analysis conclusions)*
+- **Leaderboard:** XGBoost achieved the best test performance (`Test R2: 0.6417`, `Test RMSE: 1.189`, `Test MAE: 0.9567`), followed by Random Forest (`Test R2: 0.5930`) and Ridge Baseline (`Test R2: 0.3554`). The Ridge result confirms the feature-target relationship is genuinely non-linear; the jump to tree models accounts for that structure.
+- **Overfitting:** Random Forest showed the largest train/test gap (train `R2: 0.9326` vs test `R2: 0.5930`), indicating significant overfitting at `max_depth=20`. XGBoost's sequential correction mechanism produced a more controlled gap (train `R2: 0.8038` vs test `R2: 0.6417`) with best hyperparameters `learning_rate=0.03`, `max_depth=7`, `n_estimators=200`, `subsample=0.8`.
+- **Interpretation:** A test R² of 0.64 indicates that launch-day characteristics explain a meaningful but not dominant share of variance in long-term commercial success. The remaining unexplained variance is likely attributable to unobserved signals — marketing spend, influencer coverage, community momentum — that are absent from the on-platform feature set.
+- **Tracking & Serialization:** All runs were logged to an MLflow SQLite backend. The best model was serialized to `models/best_model.joblib` alongside the training feature column order at `models/feature_names.joblib` for downstream inference.
+
+![Model Comparison](assets/model_comparison.png)
 
 ---
 
@@ -181,7 +186,7 @@ steam-ml-project/
 
 ## Setup
 
-> `requirements.txt` will be added once the modelling stages are complete. For now, the project depends on `pandas`, `numpy`, `matplotlib`, and `statsmodels`.
+> `requirements.txt` will be finalised once the evaluation and deployment stages are complete. Core dependencies include `pandas`, `numpy`, `matplotlib`, `seaborn`, `statsmodels`, `scikit-learn`, `xgboost`, `mlflow`, `joblib`, and `scipy`.
 
 
 ```bash
