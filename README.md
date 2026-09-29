@@ -2,7 +2,7 @@
 ### An End-to-End Supervised Learning Pipeline with Temporal Validation and SHAP Interpretability
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)]()
+[![Status](https://img.shields.io/badge/Status-Completed-green)]()
 [![License](https://img.shields.io/badge/License-MIT-green)](https://www.mit.edu/~amini/LICENSE.md)
 
 ---
